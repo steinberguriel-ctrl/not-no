@@ -5,63 +5,169 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Keyboard Converter</title>
 <style>
+    * {
+        box-sizing: border-box;
+    }
     body {
         margin: 0;
         font-family: Arial, sans-serif;
-        background: #0d1117;
-        color: white;
+        background: #060a12;
+        color: #a8b8d0;
         text-align: center;
         padding: 40px;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+    canvas#rain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.35;
+    }
+    .content {
+        position: relative;
+        z-index: 1;
     }
     .lang-switch {
         position: absolute;
         top: 20px;
         right: 20px;
-        background: #161b22;
+        background: #0e1623;
+        border: 1px solid #1e3050;
         padding: 10px 15px;
         border-radius: 8px;
         cursor: pointer;
         font-weight: bold;
+        color: #5b7fa6;
+        transition: color 0.3s;
+    }
+    .lang-switch:hover {
+        color: #8ab0d0;
+    }
+    .mood {
+        margin-top: 80px;
+        font-size: 13px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #2e4a6a;
     }
     h1 {
         font-size: 48px;
-        margin-top: 80px;
+        margin-top: 12px;
+        color: #c8d8f0;
+        text-shadow: 0 0 40px rgba(60, 100, 180, 0.4);
     }
     p {
         font-size: 20px;
         max-width: 600px;
-        margin: auto;
-        opacity: 0.9;
+        margin: 16px auto 0;
+        color: #6a88a8;
+        line-height: 1.7;
     }
     .download-btn {
         display: inline-block;
-        margin-top: 30px;
+        margin-top: 36px;
         padding: 15px 30px;
-        background: #238636;
-        color: white;
+        background: #102040;
+        color: #7aaad0;
         text-decoration: none;
         border-radius: 10px;
         font-size: 22px;
         font-weight: bold;
+        border: 1px solid #1e3a60;
+        transition: background 0.3s, color 0.3s, box-shadow 0.3s;
     }
     .download-btn:hover {
-        background: #2ea043;
+        background: #1a3558;
+        color: #aad0f0;
+        box-shadow: 0 0 20px rgba(40, 80, 160, 0.5);
+    }
+    .elegy {
+        margin-top: 60px;
+        font-size: 14px;
+        color: #1e3050;
+        font-style: italic;
+        letter-spacing: 1px;
     }
 </style>
 </head>
 <body>
 
-<div class="lang-switch" onclick="toggleLang()">HE / EN</div>
+<canvas id="rain"></canvas>
 
-<h1 id="title">Keyboard Converter</h1>
-<p id="desc">Convert keyboard inputs easily and quickly. Download the installer below.</p>
+<div class="content">
+    <div class="lang-switch" onclick="toggleLang()">HE / EN</div>
 
-<a id="downloadBtn" class="download-btn"
-   href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.0/AGAME.Setup.1.0.0.exe">
-   Download for Windows
-</a>
+    <div class="mood" id="mood">sadness of the ether</div>
+    <h1 id="title">Keyboard Converter</h1>
+    <p id="desc">Convert keyboard inputs easily and quickly. Download the installer below.</p>
+
+    <a id="downloadBtn" class="download-btn"
+       href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.0/AGAME.Setup.1.0.0.exe">
+       Download for Windows
+    </a>
+
+    <div class="elegy" id="elegy">&ldquo;Every key pressed is a word lost to silence.&rdquo;</div>
+</div>
 
 <script>
+/* ── rain canvas ── */
+(function () {
+    const canvas = document.getElementById('rain');
+    const ctx = canvas.getContext('2d');
+    let drops = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initDrops();
+    }
+
+    function initDrops() {
+        drops = [];
+        const cols = Math.floor(canvas.width / 18);
+        for (let i = 0; i < cols; i++) {
+            drops.push({
+                x: i * 18 + Math.random() * 10,
+                y: Math.random() * canvas.height,
+                speed: 0.6 + Math.random() * 1.2,
+                length: 12 + Math.random() * 20,
+                opacity: 0.1 + Math.random() * 0.4
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drops.forEach(d => {
+            const grad = ctx.createLinearGradient(d.x, d.y - d.length, d.x, d.y);
+            grad.addColorStop(0, `rgba(40, 80, 160, 0)`);
+            grad.addColorStop(1, `rgba(60, 120, 200, ${d.opacity})`);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y - d.length);
+            ctx.lineTo(d.x, d.y);
+            ctx.stroke();
+            d.y += d.speed;
+            if (d.y - d.length > canvas.height) {
+                d.y = -d.length;
+                d.x = Math.random() * canvas.width;
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    draw();
+})();
+
+/* ── language toggle ── */
 let lang = "en";
 
 function toggleLang() {
@@ -70,12 +176,16 @@ function toggleLang() {
         document.getElementById("title").innerText = "ממיר מקלדת";
         document.getElementById("desc").innerText = "המר בקלות ובמהירות קלטי מקלדת. הורד את ההתקנה למטה.";
         document.getElementById("downloadBtn").innerText = "הורד עבור Windows";
+        document.getElementById("mood").innerText = "עצבות האתר";
+        document.getElementById("elegy").innerHTML = "&ldquo;כל הקשה על מקש היא מילה שאבדה לשתיקה.&rdquo;";
         document.body.style.direction = "rtl";
     } else {
         lang = "en";
         document.getElementById("title").innerText = "Keyboard Converter";
         document.getElementById("desc").innerText = "Convert keyboard inputs easily and quickly. Download the installer below.";
         document.getElementById("downloadBtn").innerText = "Download for Windows";
+        document.getElementById("mood").innerText = "sadness of the ether";
+        document.getElementById("elegy").innerHTML = "&ldquo;Every key pressed is a word lost to silence.&rdquo;";
         document.body.style.direction = "ltr";
     }
 }
