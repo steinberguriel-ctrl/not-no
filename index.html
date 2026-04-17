@@ -4,160 +4,400 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Keyboard Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    * {
-        box-sizing: border-box;
+    :root {
+        --bg:          #0a0b14;
+        --surface:     rgba(255,255,255,0.04);
+        --border:      rgba(255,255,255,0.08);
+        --accent1:     #7c3aed;
+        --accent2:     #4f46e5;
+        --accent-glow: rgba(124,58,237,0.35);
+        --text-hi:     #f1f0ff;
+        --text-mid:    #a09ec0;
+        --text-lo:     #4a4870;
+        --radius-lg:   20px;
+        --radius-md:   12px;
+        --radius-sm:   8px;
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #060a12;
-        color: #a8b8d0;
-        text-align: center;
-        padding: 40px;
+        font-family: 'Inter', sans-serif;
+        background: var(--bg);
+        color: var(--text-mid);
         min-height: 100vh;
         overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    canvas#rain {
+
+    /* ── background mesh ── */
+    body::before {
+        content: '';
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        inset: 0;
+        background:
+            radial-gradient(ellipse 80% 50% at 20% 0%,  rgba(124,58,237,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 100%, rgba(79,70,229,0.14) 0%, transparent 60%);
         pointer-events: none;
         z-index: 0;
-        opacity: 0.35;
     }
-    .content {
+
+    canvas#particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.5;
+    }
+
+    /* ── nav bar ── */
+    nav {
+        position: relative;
+        z-index: 10;
+        width: 100%;
+        max-width: 1100px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 32px;
+    }
+
+    .logo {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text-hi);
+        letter-spacing: -0.3px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .logo-icon {
+        width: 28px; height: 28px;
+        background: linear-gradient(135deg, var(--accent1), var(--accent2));
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px;
+    }
+
+    .lang-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-mid);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .lang-btn:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.15);
+        color: var(--text-hi);
+    }
+
+    /* ── hero ── */
+    main {
         position: relative;
         z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 24px 80px;
+        width: 100%;
     }
-    .lang-switch {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: #0e1623;
-        border: 1px solid #1e3050;
-        padding: 10px 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-weight: bold;
-        color: #5b7fa6;
-        transition: color 0.3s;
-    }
-    .lang-switch:hover {
-        color: #8ab0d0;
-    }
-    .mood {
-        margin-top: 80px;
-        font-size: 13px;
-        letter-spacing: 4px;
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(124,58,237,0.12);
+        border: 1px solid rgba(124,58,237,0.3);
+        color: #a78bfa;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #2e4a6a;
+        padding: 6px 14px;
+        border-radius: 99px;
+        margin-bottom: 28px;
+        animation: fadeUp 0.6s ease both;
     }
+    .badge-dot {
+        width: 6px; height: 6px;
+        background: #a78bfa;
+        border-radius: 50%;
+        animation: pulse 2s ease infinite;
+    }
+
     h1 {
-        font-size: 48px;
-        margin-top: 12px;
-        color: #c8d8f0;
-        text-shadow: 0 0 40px rgba(60, 100, 180, 0.4);
+        font-size: clamp(40px, 7vw, 72px);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -2px;
+        color: var(--text-hi);
+        max-width: 800px;
+        animation: fadeUp 0.6s 0.1s ease both;
     }
-    p {
-        font-size: 20px;
-        max-width: 600px;
-        margin: 16px auto 0;
-        color: #6a88a8;
+    h1 span {
+        background: linear-gradient(90deg, #a78bfa, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .subtitle {
+        margin-top: 20px;
+        font-size: 18px;
         line-height: 1.7;
+        color: var(--text-mid);
+        max-width: 520px;
+        animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    /* ── feature chips ── */
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 32px;
+        animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 99px;
+        padding: 7px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-mid);
+    }
+    .chip-icon { font-size: 15px; }
+
+    /* ── CTA button ── */
+    .cta-wrap {
+        margin-top: 44px;
+        animation: fadeUp 0.6s 0.4s ease both;
     }
     .download-btn {
-        display: inline-block;
-        margin-top: 36px;
-        padding: 15px 30px;
-        background: #102040;
-        color: #7aaad0;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 36px;
+        background: linear-gradient(135deg, var(--accent1), var(--accent2));
+        color: #fff;
         text-decoration: none;
-        border-radius: 10px;
-        font-size: 22px;
-        font-weight: bold;
-        border: 1px solid #1e3a60;
-        transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        box-shadow: 0 0 40px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.4);
+        transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .download-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+        pointer-events: none;
     }
     .download-btn:hover {
-        background: #1a3558;
-        color: #aad0f0;
-        box-shadow: 0 0 20px rgba(40, 80, 160, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 0 60px var(--accent-glow), 0 8px 24px rgba(0,0,0,0.4);
+        filter: brightness(1.08);
     }
-    .elegy {
-        margin-top: 60px;
-        font-size: 14px;
-        color: #1e3050;
-        font-style: italic;
-        letter-spacing: 1px;
+    .download-btn:active { transform: translateY(0); }
+    .btn-icon { font-size: 20px; }
+
+    .cta-note {
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--text-lo);
+    }
+
+    /* ── glass card (stats row) ── */
+    .stats {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1px;
+        margin-top: 72px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        max-width: 620px;
+        width: 100%;
+        animation: fadeUp 0.6s 0.5s ease both;
+    }
+    .stat {
+        flex: 1 1 140px;
+        background: var(--surface);
+        padding: 24px 20px;
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--text-hi);
+        letter-spacing: -1px;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: var(--text-lo);
+        margin-top: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    /* ── footer ── */
+    footer {
+        position: relative;
+        z-index: 1;
+        padding: 24px;
+        font-size: 13px;
+        color: var(--text-lo);
+        text-align: center;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 500px) {
+        nav { padding: 16px 20px; }
+        .download-btn { padding: 14px 26px; font-size: 15px; }
     }
 </style>
 </head>
 <body>
 
-<canvas id="rain"></canvas>
+<canvas id="particles"></canvas>
 
-<div class="content">
-    <div class="lang-switch" onclick="toggleLang()">HE / EN</div>
+<!-- Nav -->
+<nav>
+    <div class="logo">
+        <div class="logo-icon">⌨</div>
+        <span id="logoText">KeyConvert</span>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()">HE / EN</button>
+</nav>
 
-    <div class="mood" id="mood">sadness of the ether</div>
-    <h1 id="title">Keyboard Converter</h1>
-    <p id="desc">Convert keyboard inputs easily and quickly. Download the installer below.</p>
+<!-- Hero -->
+<main>
+    <div class="badge">
+        <span class="badge-dot"></span>
+        <span id="badgeText">Free &amp; Open Source</span>
+    </div>
 
-    <a id="downloadBtn" class="download-btn"
-       href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.0/AGAME.Setup.1.0.0.exe">
-       Download for Windows
-    </a>
+    <h1 id="title">The <span>Keyboard Converter</span><br>you always needed</h1>
 
-    <div class="elegy" id="elegy">&ldquo;Every key pressed is a word lost to silence.&rdquo;</div>
-</div>
+    <p class="subtitle" id="desc">
+        Convert keyboard inputs instantly between layouts — fast, lightweight, and free.
+        Download the installer and get started in seconds.
+    </p>
+
+    <div class="chips">
+        <div class="chip"><span class="chip-icon">⚡</span><span id="chip1">Instant conversion</span></div>
+        <div class="chip"><span class="chip-icon">🪶</span><span id="chip2">Lightweight</span></div>
+        <div class="chip"><span class="chip-icon">🔒</span><span id="chip3">100% offline</span></div>
+        <div class="chip"><span class="chip-icon">🌐</span><span id="chip4">Multi-language</span></div>
+    </div>
+
+    <div class="cta-wrap">
+        <a id="downloadBtn" class="download-btn"
+           href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.0/AGAME.Setup.1.0.0.exe">
+            <span class="btn-icon">⬇</span>
+            <span id="btnText">Download for Windows</span>
+        </a>
+        <div class="cta-note" id="ctaNote">Windows 10 / 11 · v1.0.0 · Free</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value">v1.0</div>
+            <div class="stat-label" id="statLabel1">Latest release</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">0ms</div>
+            <div class="stat-label" id="statLabel2">Input lag</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">100%</div>
+            <div class="stat-label" id="statLabel3">Free forever</div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <span id="footerText">&copy; 2024 KeyConvert · All rights reserved</span>
+</footer>
 
 <script>
-/* ── rain canvas ── */
+/* ── floating particles ── */
 (function () {
-    const canvas = document.getElementById('rain');
+    const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
-    let drops = [];
+    let pts = [];
 
     function resize() {
-        canvas.width = window.innerWidth;
+        canvas.width  = window.innerWidth;
         canvas.height = window.innerHeight;
-        initDrops();
+        init();
     }
 
-    function initDrops() {
-        drops = [];
-        const cols = Math.floor(canvas.width / 18);
-        for (let i = 0; i < cols; i++) {
-            drops.push({
-                x: i * 18 + Math.random() * 10,
-                y: Math.random() * canvas.height,
-                speed: 0.6 + Math.random() * 1.2,
-                length: 12 + Math.random() * 20,
-                opacity: 0.1 + Math.random() * 0.4
+    function init() {
+        pts = [];
+        const n = Math.floor((canvas.width * canvas.height) / 18000);
+        for (let i = 0; i < n; i++) {
+            pts.push({
+                x:  Math.random() * canvas.width,
+                y:  Math.random() * canvas.height,
+                r:  0.5 + Math.random() * 1.5,
+                vx: (Math.random() - 0.5) * 0.25,
+                vy: (Math.random() - 0.5) * 0.25,
+                a:  0.2 + Math.random() * 0.5
             });
         }
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drops.forEach(d => {
-            const grad = ctx.createLinearGradient(d.x, d.y - d.length, d.x, d.y);
-            grad.addColorStop(0, `rgba(40, 80, 160, 0)`);
-            grad.addColorStop(1, `rgba(60, 120, 200, ${d.opacity})`);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 1;
+        pts.forEach(p => {
             ctx.beginPath();
-            ctx.moveTo(d.x, d.y - d.length);
-            ctx.lineTo(d.x, d.y);
-            ctx.stroke();
-            d.y += d.speed;
-            if (d.y - d.length > canvas.height) {
-                d.y = -d.length;
-                d.x = Math.random() * canvas.width;
-            }
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(167,139,250,${p.a})`;
+            ctx.fill();
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width)  p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
         });
         requestAnimationFrame(draw);
     }
@@ -170,24 +410,55 @@
 /* ── language toggle ── */
 let lang = "en";
 
-function toggleLang() {
-    if (lang === "en") {
-        lang = "he";
-        document.getElementById("title").innerText = "ממיר מקלדת";
-        document.getElementById("desc").innerText = "המר בקלות ובמהירות קלטי מקלדת. הורד את ההתקנה למטה.";
-        document.getElementById("downloadBtn").innerText = "הורד עבור Windows";
-        document.getElementById("mood").innerText = "עצבות האתר";
-        document.getElementById("elegy").innerHTML = "&ldquo;כל הקשה על מקש היא מילה שאבדה לשתיקה.&rdquo;";
-        document.body.style.direction = "rtl";
-    } else {
-        lang = "en";
-        document.getElementById("title").innerText = "Keyboard Converter";
-        document.getElementById("desc").innerText = "Convert keyboard inputs easily and quickly. Download the installer below.";
-        document.getElementById("downloadBtn").innerText = "Download for Windows";
-        document.getElementById("mood").innerText = "sadness of the ether";
-        document.getElementById("elegy").innerHTML = "&ldquo;Every key pressed is a word lost to silence.&rdquo;";
-        document.body.style.direction = "ltr";
+const strings = {
+    en: {
+        logoText:   "KeyConvert",
+        badgeText:  "Free &amp; Open Source",
+        title:      'The <span>Keyboard Converter</span><br>you always needed',
+        desc:       "Convert keyboard inputs instantly between layouts — fast, lightweight, and free. Download the installer and get started in seconds.",
+        chip1: "Instant conversion", chip2: "Lightweight", chip3: "100% offline", chip4: "Multi-language",
+        btnText:    "Download for Windows",
+        ctaNote:    "Windows 10 / 11 · v1.0.0 · Free",
+        statLabel1: "Latest release", statLabel2: "Input lag", statLabel3: "Free forever",
+        footerText: "&copy; 2024 KeyConvert · All rights reserved",
+        dir: "ltr"
+    },
+    he: {
+        logoText:   "ממיר מקלדת",
+        badgeText:  "חינמי וקוד פתוח",
+        title:      'ה<span>ממיר למקלדת</span><br>שתמיד רצית',
+        desc:       "המרת קלטי מקלדת בין פריסות — מהיר, קל ובחינם. הורד את ההתקנה והתחל תוך שניות.",
+        chip1: "המרה מיידית", chip2: "קל משקל", chip3: "100% אופליין", chip4: "רב-לשוני",
+        btnText:    "הורד עבור Windows",
+        ctaNote:    "Windows 10 / 11 · גרסה 1.0.0 · חינמי",
+        statLabel1: "גרסה אחרונה", statLabel2: "השהיית קלט", statLabel3: "חינמי לתמיד",
+        footerText: "&copy; 2024 ממיר מקלדת · כל הזכויות שמורות",
+        dir: "rtl"
     }
+};
+
+function applyLang(l) {
+    const s = strings[l];
+    document.getElementById("logoText").innerHTML   = s.logoText;
+    document.getElementById("badgeText").innerHTML  = s.badgeText;
+    document.getElementById("title").innerHTML      = s.title;
+    document.getElementById("desc").innerText       = s.desc;
+    document.getElementById("chip1").innerText      = s.chip1;
+    document.getElementById("chip2").innerText      = s.chip2;
+    document.getElementById("chip3").innerText      = s.chip3;
+    document.getElementById("chip4").innerText      = s.chip4;
+    document.getElementById("btnText").innerText    = s.btnText;
+    document.getElementById("ctaNote").innerText    = s.ctaNote;
+    document.getElementById("statLabel1").innerText = s.statLabel1;
+    document.getElementById("statLabel2").innerText = s.statLabel2;
+    document.getElementById("statLabel3").innerText = s.statLabel3;
+    document.getElementById("footerText").innerHTML = s.footerText;
+    document.body.style.direction                   = s.dir;
+}
+
+function toggleLang() {
+    lang = lang === "en" ? "he" : "en";
+    applyLang(lang);
 }
 </script>
 
