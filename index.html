@@ -408,12 +408,11 @@
         <div class="cta-wrap">
             <div class="cta-grid">
                 <a id="downloadBtnWin" class="download-btn"
-                    href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.2/AGAME.Setup.1.0.2.exe">
+                    href="https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.3/AGAME.Setup.1.0.3.exe">
                     <span class="btn-icon">⬇</span>
                     <span id="btnTextWin">Download for Windows</span>
                 </a>
-                <a id="downloadBtnMac" class="download-btn secondary" href="#"
-                    onclick="alert('macOS version is not available yet.'); return false;">
+                <a id="downloadBtnMac" class="download-btn secondary" href="#" onclick="handleMacDownload(event)">
                     <span class="btn-icon">🍎</span>
                     <span id="btnTextMac">Download for macOS</span>
                 </a>
@@ -554,6 +553,40 @@
         function toggleLang() {
             lang = lang === "en" ? "he" : "en";
             applyLang(lang);
+        }
+
+        const macIntelUrl = "https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.3/AGAME-1.0.3.dmg";
+        const macArmUrl = "https://github.com/steinberguriel-ctrl/keyboard/releases/download/v1.0.3/AGAME-1.0.3-arm64.dmg";
+
+        async function handleMacDownload(event) {
+            event.preventDefault();
+
+            // Detect mac architecture when possible to send users to the right installer.
+            let shouldUseArm = null;
+
+            try {
+                if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                    const values = await navigator.userAgentData.getHighEntropyValues(["architecture"]);
+                    const arch = (values.architecture || "").toLowerCase();
+                    if (arch.includes("arm")) shouldUseArm = true;
+                    if (arch.includes("x86") || arch.includes("intel")) shouldUseArm = false;
+                }
+            } catch (e) {
+                // Fall through to basic checks and manual choice.
+            }
+
+            if (shouldUseArm === null) {
+                const ua = (navigator.userAgent || "").toLowerCase();
+                if (ua.includes("arm") || ua.includes("aarch64")) {
+                    shouldUseArm = true;
+                }
+            }
+
+            if (shouldUseArm === null) {
+                shouldUseArm = confirm("Could not detect your Mac chip. Press OK for Apple Silicon (M1/M2/M3), or Cancel for Intel.");
+            }
+
+            window.location.href = shouldUseArm ? macArmUrl : macIntelUrl;
         }
     </script>
 
